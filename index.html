@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#246b8f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="自动记账">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <title>自动记账</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f2;
+      --panel: #ffffff;
+      --ink: #1f2933;
+      --muted: #68737d;
+      --line: #dce3df;
+      --income: #217a57;
+      --expense: #c4493d;
+      --accent: #246b8f;
+      --accent-strong: #184e69;
+      --shadow: 0 18px 45px rgba(31, 41, 51, .10);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(36, 107, 143, .08), transparent 280px),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .button {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .button.secondary {
+      color: var(--ink);
+      background: #e8eeea;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: clamp(22px, 3vw, 31px);
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .metric .income {
+      color: var(--income);
+    }
+
+    .metric .expense {
+      color: var(--expense);
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-panel {
+      padding: 18px;
+      position: sticky;
+      top: 16px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 13px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      color: var(--ink);
+      background: #fbfcfa;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(36, 107, 143, .16);
+    }
+
+    .type-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .type-switch button {
+      min-height: 42px;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #eef2ef;
+      border: 1px solid transparent;
+    }
+
+    .type-switch button.active[data-type="income"] {
+      color: #fff;
+      background: var(--income);
+    }
+
+    .type-switch button.active[data-type="expense"] {
+      color: #fff;
+      background: var(--expense);
+    }
+
+    .submit {
+      width: 100%;
+      min-height: 44px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--accent);
+      font-weight: 700;
+    }
+
+    .submit:hover {
+      background: var(--accent-strong);
+    }
+
+    .filters {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.4fr;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .content {
+      display: grid;
+      gap: 16px;
+    }
+
+    .daily-list {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .day {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day:last-child {
+      border-bottom: 0;
+    }
+
+    .day-head {
+      display: grid;
+      grid-template-columns: 1fr repeat(3, minmax(96px, auto));
+      gap: 10px;
+      align-items: center;
+      padding: 14px 16px;
+      background: #fbfcfa;
+    }
+
+    .day-date {
+      font-weight: 800;
+    }
+
+    .pill {
+      justify-self: end;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 13px;
+      background: #edf2ef;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .pill.income {
+      color: var(--income);
+      background: rgba(33, 122, 87, .10);
+    }
+
+    .pill.expense {
+      color: var(--expense);
+      background: rgba(196, 73, 61, .10);
+    }
+
+    .entries {
+      display: grid;
+    }
+
+    .entry {
+      display: grid;
+      grid-template-columns: 86px 1fr 120px 40px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .tag {
+      width: max-content;
+      max-width: 100%;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #fff;
+      overflow-wrap: anywhere;
+    }
+
+    .tag.income {
+      background: var(--income);
+    }
+
+    .tag.expense {
+      background: var(--expense);
+    }
+
+    .entry-main {
+      min-width: 0;
+    }
+
+    .purpose {
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .note {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .amount {
+      text-align: right;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .delete {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #eef2ef;
+      font-size: 18px;
+    }
+
+    .delete:hover {
+      color: #fff;
+      background: var(--expense);
+    }
+
+    .empty {
+      padding: 34px 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      header,
+      .main {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions .button {
+        flex: 1;
+      }
+
+      .summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .form-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        width: min(100% - 20px, 1180px);
+        padding-top: 18px;
+      }
+
+      .summary,
+      .filters,
+      .day-head,
+      .entry {
+        grid-template-columns: 1fr;
+      }
+
+      .pill,
+      .amount {
+        justify-self: start;
+        text-align: left;
+      }
+
+      .delete {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>自动记账</h1>
+        <p class="subtitle">记录日期、金额、用途和收入，自动计算每日盈利与总利润。</p>
+      </div>
+      <div class="actions">
+        <button class="button" id="installBtn" type="button" hidden>安装到手机</button>
+        <button class="button secondary" id="exportBtn" type="button">导出 CSV</button>
+        <button class="button secondary" id="clearBtn" type="button">清空数据</button>
+      </div>
+    </header>
+
+    <section class="summary" aria-label="汇总">
+      <div class="metric">
+        <span>总收入</span>
+        <strong class="income" id="totalIncome">¥0.00</strong>
+      </div>
+      <div class="metric">
+        <span>总花费</span>
+        <strong class="expense" id="totalExpense">¥0.00</strong>
+      </div>
+      <div class="metric">
+        <span>总盈利</span>
+        <strong id="totalProfit">¥0.00</strong>
+      </div>
+      <div class="metric">
+        <span>今日盈利</span>
+        <strong id="todayProfit">¥0.00</strong>
+      </div>
+    </section>
+
+    <section class="main">
+      <form class="panel form-panel" id="entryForm">
+        <h2>新增记录</h2>
+        <div class="type-switch" aria-label="记录类型">
+          <button class="active" data-type="expense" type="button">花费</button>
+          <button data-type="income" type="button">收入</button>
+        </div>
+        <input id="typeInput" name="type" type="hidden" value="expense">
+
+        <div class="field">
+          <label for="dateInput">日期</label>
+          <input id="dateInput" name="date" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="amountInput">金额</label>
+          <input id="amountInput" name="amount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="例如 128.50" required>
+        </div>
+
+        <div class="field">
+          <label for="purposeInput">用途</label>
+          <input id="purposeInput" name="purpose" type="text" maxlength="40" placeholder="餐饮、交通、销售收入..." required>
+        </div>
+
+        <div class="field">
+          <label for="noteInput">备注</label>
+          <textarea id="noteInput" name="note" maxlength="120" placeholder="可选"></textarea>
+        </div>
+
+        <button class="submit" type="submit">保存记录</button>
+      </form>
+
+      <section class="content">
+        <div class="panel filters" aria-label="筛选">
+          <div class="field">
+            <label for="monthFilter">月份</label>
+            <input id="monthFilter" type="month">
+          </div>
+          <div class="field">
+            <label for="typeFilter">类型</label>
+            <select id="typeFilter">
+              <option value="all">全部</option>
+              <option value="expense">花费</option>
+              <option value="income">收入</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="searchInput">搜索用途</label>
+            <input id="searchInput" type="search" placeholder="输入关键词">
+          </div>
+        </div>
+
+        <div class="panel daily-list" id="dailyList"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "auto-account-book-v1";
+    const today = new Date().toISOString().slice(0, 10);
+    const currentMonth = today.slice(0, 7);
+
+    const form = document.querySelector("#entryForm");
+    const typeInput = document.querySelector("#typeInput");
+    const dateInput = document.querySelector("#dateInput");
+    const amountInput = document.querySelector("#amountInput");
+    const purposeInput = document.querySelector("#purposeInput");
+    const noteInput = document.querySelector("#noteInput");
+    const monthFilter = document.querySelector("#monthFilter");
+    const typeFilter = document.querySelector("#typeFilter");
+    const searchInput = document.querySelector("#searchInput");
+    const dailyList = document.querySelector("#dailyList");
+    const installBtn = document.querySelector("#installBtn");
+    const exportBtn = document.querySelector("#exportBtn");
+    const clearBtn = document.querySelector("#clearBtn");
+    const totals = {
+      income: document.querySelector("#totalIncome"),
+      expense: document.querySelector("#totalExpense"),
+      profit: document.querySelector("#totalProfit"),
+      today: document.querySelector("#todayProfit"),
+    };
+
+    let entries = loadEntries();
+    let installPrompt = null;
+    const iosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+
+    dateInput.value = today;
+    monthFilter.value = currentMonth;
+    installBtn.hidden = !iosDevice || standalone;
+
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js");
+      });
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      installPrompt = event;
+      installBtn.hidden = false;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      installPrompt = null;
+      installBtn.hidden = true;
+    });
+
+    document.querySelectorAll(".type-switch button").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".type-switch button").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        typeInput.value = button.dataset.type;
+      });
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const amount = Number(amountInput.value);
+      if (!Number.isFinite(amount) || amount <= 0) return;
+
+      entries.push({
+        id: createId(),
+        type: typeInput.value,
+        date: dateInput.value,
+        amount,
+        purpose: purposeInput.value.trim(),
+        note: noteInput.value.trim(),
+        createdAt: new Date().toISOString(),
+      });
+
+      saveEntries();
+      form.reset();
+      dateInput.value = today;
+      typeInput.value = "expense";
+      document.querySelectorAll(".type-switch button").forEach((item) => {
+        item.classList.toggle("active", item.dataset.type === "expense");
+      });
+      render();
+      purposeInput.focus();
+    });
+
+    [monthFilter, typeFilter, searchInput].forEach((input) => input.addEventListener("input", render));
+
+    installBtn.addEventListener("click", async () => {
+      if (installPrompt) {
+        installPrompt.prompt();
+        await installPrompt.userChoice;
+        installPrompt = null;
+        installBtn.hidden = true;
+        return;
+      }
+
+      alert("请在手机浏览器菜单中选择“添加到主屏幕”或“安装应用”。iPhone 请使用 Safari 打开后点击分享按钮。");
+    });
+
+    dailyList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete-id]");
+      if (!button) return;
+      entries = entries.filter((entry) => entry.id !== button.dataset.deleteId);
+      saveEntries();
+      render();
+    });
+
+    exportBtn.addEventListener("click", () => {
+      if (!entries.length) return;
+      const rows = [
+        ["日期", "类型", "金额", "用途", "备注"],
+        ...sortEntries(entries).map((entry) => [
+          entry.date,
+          entry.type === "income" ? "收入" : "花费",
+          entry.amount.toFixed(2),
+          entry.purpose,
+          entry.note,
+        ]),
+      ];
+      const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `记账-${today}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      if (!entries.length) return;
+      if (!confirm("确定要清空所有记账数据吗？此操作不可恢复。")) return;
+      entries = [];
+      saveEntries();
+      render();
+    });
+
+    function loadEntries() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function createId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function sortEntries(list) {
+      return [...list].sort((a, b) => {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return b.createdAt.localeCompare(a.createdAt);
+      });
+    }
+
+    function filteredEntries() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      return sortEntries(entries).filter((entry) => {
+        const matchesMonth = !monthFilter.value || entry.date.startsWith(monthFilter.value);
+        const matchesType = typeFilter.value === "all" || entry.type === typeFilter.value;
+        const matchesKeyword = !keyword || `${entry.purpose} ${entry.note}`.toLowerCase().includes(keyword);
+        return matchesMonth && matchesType && matchesKeyword;
+      });
+    }
+
+    function groupByDate(list) {
+      return list.reduce((groups, entry) => {
+        if (!groups[entry.date]) groups[entry.date] = [];
+        groups[entry.date].push(entry);
+        return groups;
+      }, {});
+    }
+
+    function money(value) {
+      return new Intl.NumberFormat("zh-CN", {
+        style: "currency",
+        currency: "CNY",
+      }).format(value);
+    }
+
+    function signedAmount(entry) {
+      return entry.type === "income" ? entry.amount : -entry.amount;
+    }
+
+    function summarize(list) {
+      return list.reduce((sum, entry) => {
+        if (entry.type === "income") sum.income += entry.amount;
+        if (entry.type === "expense") sum.expense += entry.amount;
+        sum.profit += signedAmount(entry);
+        return sum;
+      }, { income: 0, expense: 0, profit: 0 });
+    }
+
+    function setProfitStyle(element, value) {
+      element.classList.toggle("income", value >= 0);
+      element.classList.toggle("expense", value < 0);
+    }
+
+    function renderSummary() {
+      const all = summarize(entries);
+      const todaySummary = summarize(entries.filter((entry) => entry.date === today));
+      totals.income.textContent = money(all.income);
+      totals.expense.textContent = money(all.expense);
+      totals.profit.textContent = money(all.profit);
+      totals.today.textContent = money(todaySummary.profit);
+      setProfitStyle(totals.profit, all.profit);
+      setProfitStyle(totals.today, todaySummary.profit);
+    }
+
+    function render() {
+      renderSummary();
+      const list = filteredEntries();
+      if (!list.length) {
+        dailyList.innerHTML = '<div class="empty">暂无记录，先添加一笔收入或花费。</div>';
+        return;
+      }
+
+      const groups = groupByDate(list);
+      dailyList.innerHTML = Object.keys(groups).map((date) => {
+        const dayEntries = groups[date];
+        const sum = summarize(dayEntries);
+        return `
+          <article class="day">
+            <div class="day-head">
+              <div class="day-date">${escapeHtml(date)}</div>
+              <div class="pill income">收入 ${money(sum.income)}</div>
+              <div class="pill expense">花费 ${money(sum.expense)}</div>
+              <div class="pill ${sum.profit >= 0 ? "income" : "expense"}">盈利 ${money(sum.profit)}</div>
+            </div>
+            <div class="entries">
+              ${dayEntries.map(renderEntry).join("")}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderEntry(entry) {
+      const label = entry.type === "income" ? "收入" : "花费";
+      const amount = entry.type === "income" ? money(entry.amount) : `-${money(entry.amount)}`;
+      return `
+        <div class="entry">
+          <span class="tag ${entry.type}">${label}</span>
+          <div class="entry-main">
+            <div class="purpose">${escapeHtml(entry.purpose)}</div>
+            ${entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : ""}
+          </div>
+          <div class="amount ${entry.type}">${amount}</div>
+          <button class="delete" type="button" title="删除" data-delete-id="${entry.id}">×</button>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      }[char]));
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    render();
+  </script>
+</body>
+</html>
