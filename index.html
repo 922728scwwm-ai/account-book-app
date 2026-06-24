@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -14,16 +15,18 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f6f7f2;
+      --bg: #f5f7f4;
       --panel: #ffffff;
+      --panel-soft: #eef4f1;
       --ink: #1f2933;
-      --muted: #68737d;
-      --line: #dce3df;
-      --income: #217a57;
+      --muted: #65727d;
+      --line: #d9e2de;
+      --income: #1f7a55;
       --expense: #c4493d;
+      --profit: #246b8f;
       --accent: #246b8f;
-      --accent-strong: #184e69;
-      --shadow: 0 18px 45px rgba(31, 41, 51, .10);
+      --accent-dark: #174a63;
+      --shadow: 0 18px 42px rgba(31, 41, 51, .10);
       font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
     }
 
@@ -35,15 +38,14 @@
       margin: 0;
       min-height: 100vh;
       background:
-        linear-gradient(180deg, rgba(36, 107, 143, .08), transparent 280px),
+        linear-gradient(180deg, rgba(36, 107, 143, .09), transparent 300px),
         var(--bg);
       color: var(--ink);
     }
 
     button,
     input,
-    select,
-    textarea {
+    select {
       font: inherit;
     }
 
@@ -53,22 +55,22 @@
     }
 
     .app {
-      width: min(1180px, calc(100% - 32px));
+      width: min(1220px, calc(100% - 28px));
       margin: 0 auto;
-      padding: 28px 0 44px;
+      padding: 24px 0 42px;
     }
 
     header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 18px;
-      margin-bottom: 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 18px;
     }
 
     h1 {
       margin: 0 0 6px;
-      font-size: clamp(28px, 4vw, 44px);
+      font-size: clamp(30px, 5vw, 46px);
       line-height: 1.05;
     }
 
@@ -79,18 +81,15 @@
     }
 
     .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      position: relative;
     }
 
     .button {
       min-height: 40px;
       padding: 0 14px;
       border-radius: 8px;
-      background: var(--ink);
       color: #fff;
+      background: var(--ink);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -103,45 +102,38 @@
       background: #e8eeea;
     }
 
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
+    .menu-toggle {
+      width: 42px;
+      min-width: 42px;
+      padding: 0;
+      font-size: 22px;
+      line-height: 1;
     }
 
-    .metric {
-      background: var(--panel);
+    .action-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 20;
+      display: grid;
+      gap: 8px;
+      min-width: 176px;
+      padding: 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 18px;
+      background: var(--panel);
       box-shadow: var(--shadow);
-      min-width: 0;
     }
 
-    .metric span {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 8px;
+    .action-menu[hidden] {
+      display: none;
     }
 
-    .metric strong {
-      display: block;
-      font-size: clamp(22px, 3vw, 31px);
-      line-height: 1.1;
-      overflow-wrap: anywhere;
+    .action-menu .button {
+      width: 100%;
     }
 
-    .metric .income {
-      color: var(--income);
-    }
-
-    .metric .expense {
-      color: var(--expense);
-    }
-
-    .main {
+    .layout {
       display: grid;
       grid-template-columns: 360px minmax(0, 1fr);
       gap: 16px;
@@ -155,15 +147,58 @@
       box-shadow: var(--shadow);
     }
 
-    .form-panel {
-      padding: 18px;
+    .entry-panel {
       position: sticky;
-      top: 16px;
+      top: 14px;
+      padding: 18px;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.2;
     }
 
     h2 {
-      margin: 0 0 14px;
       font-size: 20px;
+    }
+
+    h3 {
+      font-size: 16px;
+    }
+
+    .type-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .type-switch button {
+      min-height: 42px;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #edf2ef;
+      border: 1px solid transparent;
+      font-weight: 700;
+    }
+
+    .type-switch button.active[data-type="expense"] {
+      color: #fff;
+      background: var(--expense);
+    }
+
+    .type-switch button.active[data-type="income"] {
+      color: #fff;
+      background: var(--income);
     }
 
     .field {
@@ -178,8 +213,7 @@
     }
 
     input,
-    select,
-    textarea {
+    select {
       width: 100%;
       min-height: 42px;
       border: 1px solid var(--line);
@@ -190,126 +224,273 @@
       outline: none;
     }
 
-    textarea {
-      min-height: 78px;
-      resize: vertical;
-    }
-
     input:focus,
-    select:focus,
-    textarea:focus {
+    select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(36, 107, 143, .16);
     }
 
-    .type-switch {
+    .choice-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr auto;
       gap: 8px;
-      margin-bottom: 14px;
     }
 
-    .type-switch button {
+    .small-button {
       min-height: 42px;
+      padding: 0 12px;
       border-radius: 8px;
-      color: var(--muted);
-      background: #eef2ef;
-      border: 1px solid transparent;
+      color: var(--accent-dark);
+      background: #e5eff0;
+      font-weight: 700;
     }
 
-    .type-switch button.active[data-type="income"] {
-      color: #fff;
-      background: var(--income);
+    .custom-field {
+      margin-top: -5px;
     }
 
-    .type-switch button.active[data-type="expense"] {
-      color: #fff;
-      background: var(--expense);
+    .custom-field[hidden] {
+      display: none;
     }
 
     .submit {
       width: 100%;
-      min-height: 44px;
+      min-height: 46px;
       border-radius: 8px;
       color: #fff;
       background: var(--accent);
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .submit:hover {
-      background: var(--accent-strong);
+      background: var(--accent-dark);
     }
 
-    .filters {
-      padding: 14px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1.4fr;
-      gap: 10px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .content {
+    .dashboard {
       display: grid;
       gap: 16px;
     }
 
-    .daily-list {
-      padding: 0;
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: clamp(22px, 3vw, 31px);
+      line-height: 1.08;
+      overflow-wrap: anywhere;
+    }
+
+    .income-text {
+      color: var(--income);
+    }
+
+    .expense-text {
+      color: var(--expense);
+    }
+
+    .profit-text {
+      color: var(--profit);
+    }
+
+    .loss-text {
+      color: var(--expense);
+    }
+
+    .chart-panel {
+      padding: 16px;
+    }
+
+    .chart-head,
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .bar-chart {
+      display: grid;
+      gap: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 84px minmax(0, 1fr) 112px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .bar-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .bar-track {
+      min-height: 15px;
+      border-radius: 8px;
+      background: #e8eeea;
       overflow: hidden;
     }
 
-    .day {
-      border-bottom: 1px solid var(--line);
+    .bar-fill {
+      height: 15px;
+      min-width: 3px;
+      border-radius: 8px;
+      transition: width .2s ease;
     }
 
-    .day:last-child {
-      border-bottom: 0;
+    .bar-fill.income {
+      background: var(--income);
     }
 
-    .day-head {
+    .bar-fill.expense {
+      background: var(--expense);
+    }
+
+    .bar-fill.profit {
+      background: var(--profit);
+    }
+
+    .bar-fill.loss {
+      background: var(--expense);
+    }
+
+    .bar-value {
+      text-align: right;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .filters {
       display: grid;
-      grid-template-columns: 1fr repeat(3, minmax(96px, auto));
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 10px;
-      align-items: center;
-      padding: 14px 16px;
+      padding: 14px;
+    }
+
+    .month-list,
+    .day-list {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .month-card,
+    .day-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
       background: #fbfcfa;
     }
 
-    .day-date {
-      font-weight: 800;
+    .month-button {
+      width: 100%;
+      min-height: 62px;
+      padding: 13px 14px;
+      background: transparent;
+      color: var(--ink);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      text-align: left;
+      align-items: center;
+    }
+
+    .month-title {
+      font-weight: 900;
+      font-size: 17px;
+    }
+
+    .month-mini {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .pill {
-      justify-self: end;
-      padding: 6px 9px;
+      width: max-content;
+      max-width: 100%;
+      padding: 5px 8px;
       border-radius: 8px;
-      font-size: 13px;
-      background: #edf2ef;
       color: var(--muted);
+      background: #edf2ef;
+      font-size: 12px;
       white-space: nowrap;
     }
 
     .pill.income {
       color: var(--income);
-      background: rgba(33, 122, 87, .10);
+      background: rgba(31, 122, 85, .11);
     }
 
     .pill.expense {
       color: var(--expense);
-      background: rgba(196, 73, 61, .10);
+      background: rgba(196, 73, 61, .12);
     }
 
-    .entries {
+    .pill.profit {
+      color: var(--profit);
+      background: rgba(36, 107, 143, .12);
+    }
+
+    .month-details {
       display: grid;
+      gap: 12px;
+      padding: 0 14px 14px;
+    }
+
+    .month-details[hidden] {
+      display: none;
+    }
+
+    .day-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      background: #f4f8f5;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day-date {
+      font-weight: 900;
     }
 
     .entry {
       display: grid;
-      grid-template-columns: 86px 1fr 120px 40px;
-      gap: 12px;
+      grid-template-columns: 72px minmax(0, 1fr) 110px 40px;
+      gap: 10px;
       align-items: center;
-      padding: 12px 16px;
-      border-top: 1px solid var(--line);
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .entry:last-child {
+      border-bottom: 0;
     }
 
     .tag {
@@ -317,9 +498,9 @@
       max-width: 100%;
       padding: 5px 8px;
       border-radius: 8px;
-      font-size: 12px;
       color: #fff;
-      overflow-wrap: anywhere;
+      font-size: 12px;
+      font-weight: 800;
     }
 
     .tag.income {
@@ -334,21 +515,21 @@
       min-width: 0;
     }
 
-    .purpose {
-      font-weight: 700;
+    .entry-purpose {
+      font-weight: 800;
       overflow-wrap: anywhere;
     }
 
-    .note {
+    .entry-source {
       margin-top: 3px;
       color: var(--muted);
       font-size: 13px;
       overflow-wrap: anywhere;
     }
 
-    .amount {
+    .entry-amount {
       text-align: right;
-      font-weight: 800;
+      font-weight: 900;
       overflow-wrap: anywhere;
     }
 
@@ -357,7 +538,7 @@
       height: 34px;
       border-radius: 8px;
       color: var(--muted);
-      background: #eef2ef;
+      background: #edf2ef;
       font-size: 18px;
     }
 
@@ -367,55 +548,47 @@
     }
 
     .empty {
-      padding: 34px 18px;
+      padding: 28px 16px;
       text-align: center;
       color: var(--muted);
     }
 
-    .hidden {
-      display: none;
-    }
-
-    @media (max-width: 900px) {
+    @media (max-width: 980px) {
       header,
-      .main {
-        display: grid;
+      .layout {
         grid-template-columns: 1fr;
       }
 
-      .actions {
-        justify-content: stretch;
-      }
-
-      .actions .button {
-        flex: 1;
-      }
-
-      .summary {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .form-panel {
+      .entry-panel {
         position: static;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
     @media (max-width: 640px) {
       .app {
-        width: min(100% - 20px, 1180px);
-        padding-top: 18px;
+        width: min(100% - 20px, 1220px);
+        padding-top: 16px;
       }
 
-      .summary,
+      .summary-grid,
       .filters,
+      .bar-row,
+      .month-button,
       .day-head,
       .entry {
         grid-template-columns: 1fr;
       }
 
-      .pill,
-      .amount {
-        justify-self: start;
+      .month-mini {
+        justify-content: flex-start;
+      }
+
+      .bar-value,
+      .entry-amount {
         text-align: left;
       }
 
@@ -430,37 +603,25 @@
     <header>
       <div>
         <h1>自动记账</h1>
-        <p class="subtitle">记录日期、金额、用途和收入，自动计算每日盈利与总利润。</p>
+        <p class="subtitle">用日期、金额、用途和来源看清每天与每月的钱流向。</p>
       </div>
       <div class="actions">
-        <button class="button" id="installBtn" type="button" hidden>安装到手机</button>
-        <button class="button secondary" id="exportBtn" type="button">导出 CSV</button>
-        <button class="button secondary" id="clearBtn" type="button">清空数据</button>
+        <button class="button secondary menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="actionMenu" title="更多操作">⋯</button>
+        <div class="action-menu" id="actionMenu" hidden>
+          <button class="button" id="installBtn" type="button" hidden>安装到手机</button>
+          <button class="button secondary" id="exportBtn" type="button">导出 CSV</button>
+          <button class="button secondary" id="clearBtn" type="button">清空数据</button>
+        </div>
       </div>
     </header>
 
-    <section class="summary" aria-label="汇总">
-      <div class="metric">
-        <span>总收入</span>
-        <strong class="income" id="totalIncome">¥0.00</strong>
-      </div>
-      <div class="metric">
-        <span>总花费</span>
-        <strong class="expense" id="totalExpense">¥0.00</strong>
-      </div>
-      <div class="metric">
-        <span>总盈利</span>
-        <strong id="totalProfit">¥0.00</strong>
-      </div>
-      <div class="metric">
-        <span>今日盈利</span>
-        <strong id="todayProfit">¥0.00</strong>
-      </div>
-    </section>
+    <section class="layout">
+      <form class="panel entry-panel" id="entryForm">
+        <div class="panel-title">
+          <h2>新增记录</h2>
+          <span class="muted" id="currentDateLabel"></span>
+        </div>
 
-    <section class="main">
-      <form class="panel form-panel" id="entryForm">
-        <h2>新增记录</h2>
         <div class="type-switch" aria-label="记录类型">
           <button class="active" data-type="expense" type="button">花费</button>
           <button data-type="income" type="button">收入</button>
@@ -478,61 +639,144 @@
         </div>
 
         <div class="field">
-          <label for="purposeInput">用途</label>
-          <input id="purposeInput" name="purpose" type="text" maxlength="40" placeholder="餐饮、交通、销售收入..." required>
+          <label for="purposeSelect">用途</label>
+          <div class="choice-row">
+            <select id="purposeSelect" name="purpose">
+              <option value="话费">话费</option>
+              <option value="房租">房租</option>
+              <option value="出行">出行</option>
+              <option value="改善生活">改善生活</option>
+              <option value="日用品">日用品</option>
+              <option value="餐饮">餐饮</option>
+              <option value="医疗">医疗</option>
+              <option value="学习">学习</option>
+            </select>
+            <button class="small-button" id="customPurposeBtn" type="button">编辑</button>
+          </div>
+        </div>
+
+        <div class="field custom-field" id="customPurposeField" hidden>
+          <label for="customPurposeInput">手动填写用途</label>
+          <input id="customPurposeInput" type="text" maxlength="32" placeholder="输入新用途">
         </div>
 
         <div class="field">
-          <label for="noteInput">备注</label>
-          <textarea id="noteInput" name="note" maxlength="120" placeholder="可选"></textarea>
+          <label for="sourceSelect">来源</label>
+          <div class="choice-row">
+            <select id="sourceSelect" name="source">
+              <option value="工资">工资</option>
+              <option value="基金">基金</option>
+              <option value="奖金">奖金</option>
+              <option value="副业">副业</option>
+              <option value="现金">现金</option>
+              <option value="银行卡">银行卡</option>
+              <option value="支付宝">支付宝</option>
+              <option value="微信">微信</option>
+            </select>
+            <button class="small-button" id="customSourceBtn" type="button">编辑</button>
+          </div>
+        </div>
+
+        <div class="field custom-field" id="customSourceField" hidden>
+          <label for="customSourceInput">手动填写来源</label>
+          <input id="customSourceInput" type="text" maxlength="32" placeholder="输入新来源">
         </div>
 
         <button class="submit" type="submit">保存记录</button>
       </form>
 
-      <section class="content">
-        <div class="panel filters" aria-label="筛选">
-          <div class="field">
-            <label for="monthFilter">月份</label>
-            <input id="monthFilter" type="month">
+      <section class="dashboard">
+        <section class="summary-grid" aria-label="总览">
+          <div class="panel metric">
+            <span>总收入</span>
+            <strong class="income-text" id="totalIncome">¥0.00</strong>
           </div>
-          <div class="field">
-            <label for="typeFilter">类型</label>
-            <select id="typeFilter">
-              <option value="all">全部</option>
-              <option value="expense">花费</option>
-              <option value="income">收入</option>
-            </select>
+          <div class="panel metric">
+            <span>总花费</span>
+            <strong class="expense-text" id="totalExpense">¥0.00</strong>
           </div>
-          <div class="field">
-            <label for="searchInput">搜索用途</label>
-            <input id="searchInput" type="search" placeholder="输入关键词">
+          <div class="panel metric">
+            <span>总盈利</span>
+            <strong class="profit-text" id="totalProfit">¥0.00</strong>
           </div>
-        </div>
+          <div class="panel metric">
+            <span>今日盈利</span>
+            <strong class="profit-text" id="todayProfit">¥0.00</strong>
+          </div>
+        </section>
 
-        <div class="panel daily-list" id="dailyList"></div>
+        <section class="panel chart-panel">
+          <div class="chart-head">
+            <h2>主页面统计图</h2>
+            <span class="muted">收入 / 花费 / 盈利对比</span>
+          </div>
+          <div class="bar-chart" id="totalChart"></div>
+        </section>
+
+        <section class="panel">
+          <div class="filters">
+            <div class="field">
+              <label for="dateFilter">查看日期</label>
+              <input id="dateFilter" type="date">
+            </div>
+            <div class="field">
+              <label for="monthFilter">查看月份</label>
+              <input id="monthFilter" type="month">
+            </div>
+            <div class="field">
+              <label for="typeFilter">类型</label>
+              <select id="typeFilter">
+                <option value="all">全部</option>
+                <option value="expense">花费</option>
+                <option value="income">收入</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="month-list" id="monthList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="day-list" id="dayList"></div>
+        </section>
       </section>
     </section>
   </main>
 
   <script>
-    const STORAGE_KEY = "auto-account-book-v1";
+    const STORAGE_KEY = "auto-account-book-v2";
+    const OLD_STORAGE_KEY = "auto-account-book-v1";
     const today = new Date().toISOString().slice(0, 10);
     const currentMonth = today.slice(0, 7);
+    const purposeOptions = ["话费", "房租", "出行", "改善生活", "日用品", "餐饮", "医疗", "学习"];
+    const sourceOptions = ["工资", "基金", "奖金", "副业", "现金", "银行卡", "支付宝", "微信"];
 
     const form = document.querySelector("#entryForm");
     const typeInput = document.querySelector("#typeInput");
     const dateInput = document.querySelector("#dateInput");
     const amountInput = document.querySelector("#amountInput");
-    const purposeInput = document.querySelector("#purposeInput");
-    const noteInput = document.querySelector("#noteInput");
+    const purposeSelect = document.querySelector("#purposeSelect");
+    const sourceSelect = document.querySelector("#sourceSelect");
+    const customPurposeBtn = document.querySelector("#customPurposeBtn");
+    const customSourceBtn = document.querySelector("#customSourceBtn");
+    const customPurposeField = document.querySelector("#customPurposeField");
+    const customSourceField = document.querySelector("#customSourceField");
+    const customPurposeInput = document.querySelector("#customPurposeInput");
+    const customSourceInput = document.querySelector("#customSourceInput");
+    const dateFilter = document.querySelector("#dateFilter");
     const monthFilter = document.querySelector("#monthFilter");
     const typeFilter = document.querySelector("#typeFilter");
-    const searchInput = document.querySelector("#searchInput");
-    const dailyList = document.querySelector("#dailyList");
+    const totalChart = document.querySelector("#totalChart");
+    const monthList = document.querySelector("#monthList");
+    const dayList = document.querySelector("#dayList");
+    const menuToggle = document.querySelector("#menuToggle");
+    const actionMenu = document.querySelector("#actionMenu");
     const installBtn = document.querySelector("#installBtn");
     const exportBtn = document.querySelector("#exportBtn");
     const clearBtn = document.querySelector("#clearBtn");
+    const currentDateLabel = document.querySelector("#currentDateLabel");
     const totals = {
       income: document.querySelector("#totalIncome"),
       expense: document.querySelector("#totalExpense"),
@@ -542,11 +786,14 @@
 
     let entries = loadEntries();
     let installPrompt = null;
+    let openMonth = currentMonth;
     const iosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
 
     dateInput.value = today;
+    dateFilter.value = today;
     monthFilter.value = currentMonth;
+    currentDateLabel.textContent = `今天 ${today}`;
     installBtn.hidden = !iosDevice || standalone;
 
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
@@ -567,40 +814,58 @@
     });
 
     document.querySelectorAll(".type-switch button").forEach((button) => {
-      button.addEventListener("click", () => {
-        document.querySelectorAll(".type-switch button").forEach((item) => item.classList.remove("active"));
-        button.classList.add("active");
-        typeInput.value = button.dataset.type;
-      });
+      button.addEventListener("click", () => setType(button.dataset.type));
     });
+
+    customPurposeBtn.addEventListener("click", () => toggleCustom(customPurposeField, customPurposeInput));
+    customSourceBtn.addEventListener("click", () => toggleCustom(customSourceField, customSourceInput));
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       const amount = Number(amountInput.value);
-      if (!Number.isFinite(amount) || amount <= 0) return;
+      const purpose = customPurposeField.hidden ? purposeSelect.value : customPurposeInput.value.trim();
+      const source = customSourceField.hidden ? sourceSelect.value : customSourceInput.value.trim();
+      if (!Number.isFinite(amount) || amount <= 0 || !purpose || !source) return;
 
       entries.push({
         id: createId(),
         type: typeInput.value,
         date: dateInput.value,
         amount,
-        purpose: purposeInput.value.trim(),
-        note: noteInput.value.trim(),
+        purpose,
+        source,
         createdAt: new Date().toISOString(),
       });
 
       saveEntries();
-      form.reset();
-      dateInput.value = today;
-      typeInput.value = "expense";
-      document.querySelectorAll(".type-switch button").forEach((item) => {
-        item.classList.toggle("active", item.dataset.type === "expense");
-      });
+      resetForm();
+      openMonth = dateInput.value.slice(0, 7);
+      monthFilter.value = openMonth;
       render();
-      purposeInput.focus();
     });
 
-    [monthFilter, typeFilter, searchInput].forEach((input) => input.addEventListener("input", render));
+    [dateFilter, monthFilter, typeFilter].forEach((input) => input.addEventListener("input", () => {
+      if (input === monthFilter) openMonth = monthFilter.value;
+      render();
+    }));
+
+    menuToggle.addEventListener("click", () => {
+      const nextOpen = actionMenu.hidden;
+      actionMenu.hidden = !nextOpen;
+      menuToggle.setAttribute("aria-expanded", String(nextOpen));
+    });
+
+    document.addEventListener("click", (event) => {
+      if (actionMenu.hidden || event.target.closest(".actions")) return;
+      actionMenu.hidden = true;
+      menuToggle.setAttribute("aria-expanded", "false");
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      actionMenu.hidden = true;
+      menuToggle.setAttribute("aria-expanded", "false");
+    });
 
     installBtn.addEventListener("click", async () => {
       if (installPrompt) {
@@ -610,28 +875,19 @@
         installBtn.hidden = true;
         return;
       }
-
-      alert("请在手机浏览器菜单中选择“添加到主屏幕”或“安装应用”。iPhone 请使用 Safari 打开后点击分享按钮。");
-    });
-
-    dailyList.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-delete-id]");
-      if (!button) return;
-      entries = entries.filter((entry) => entry.id !== button.dataset.deleteId);
-      saveEntries();
-      render();
+      alert("请在 iPhone Safari 中点击分享按钮，然后选择“添加到主屏幕”。");
     });
 
     exportBtn.addEventListener("click", () => {
       if (!entries.length) return;
       const rows = [
-        ["日期", "类型", "金额", "用途", "备注"],
+        ["日期", "类型", "金额", "用途", "来源"],
         ...sortEntries(entries).map((entry) => [
           entry.date,
           entry.type === "income" ? "收入" : "花费",
           entry.amount.toFixed(2),
           entry.purpose,
-          entry.note,
+          entry.source,
         ]),
       ];
       const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
@@ -652,12 +908,77 @@
       render();
     });
 
+    monthList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-month]");
+      if (!button) return;
+      openMonth = openMonth === button.dataset.month ? "" : button.dataset.month;
+      monthFilter.value = button.dataset.month;
+      render();
+    });
+
+    dayList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete-id]");
+      if (!button) return;
+      entries = entries.filter((entry) => entry.id !== button.dataset.deleteId);
+      saveEntries();
+      render();
+    });
+
+    function setType(type) {
+      typeInput.value = type;
+      document.querySelectorAll(".type-switch button").forEach((item) => {
+        item.classList.toggle("active", item.dataset.type === type);
+      });
+      if (type === "income") {
+        purposeSelect.value = purposeOptions.includes("工资") ? "工资" : purposeSelect.value;
+        sourceSelect.value = "工资";
+      } else {
+        purposeSelect.value = "日用品";
+        sourceSelect.value = "支付宝";
+      }
+    }
+
+    function toggleCustom(field, input) {
+      field.hidden = !field.hidden;
+      if (!field.hidden) input.focus();
+      if (field.hidden) input.value = "";
+    }
+
+    function resetForm() {
+      amountInput.value = "";
+      dateInput.value = today;
+      customPurposeField.hidden = true;
+      customSourceField.hidden = true;
+      customPurposeInput.value = "";
+      customSourceInput.value = "";
+      setType("expense");
+      amountInput.focus();
+    }
+
     function loadEntries() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      } catch {
-        return [];
-      }
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (Array.isArray(saved)) return saved.map(normalizeEntry);
+      } catch {}
+
+      try {
+        const oldSaved = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY));
+        if (Array.isArray(oldSaved)) return oldSaved.map(normalizeEntry);
+      } catch {}
+
+      return [];
+    }
+
+    function normalizeEntry(entry) {
+      return {
+        id: entry.id || createId(),
+        type: entry.type === "income" ? "income" : "expense",
+        date: entry.date || today,
+        amount: Number(entry.amount) || 0,
+        purpose: entry.purpose || "未分类",
+        source: entry.source || (entry.type === "income" ? "工资" : "现金"),
+        createdAt: entry.createdAt || new Date().toISOString(),
+      };
     }
 
     function saveEntries() {
@@ -676,22 +997,13 @@
       });
     }
 
-    function filteredEntries() {
-      const keyword = searchInput.value.trim().toLowerCase();
-      return sortEntries(entries).filter((entry) => {
-        const matchesMonth = !monthFilter.value || entry.date.startsWith(monthFilter.value);
-        const matchesType = typeFilter.value === "all" || entry.type === typeFilter.value;
-        const matchesKeyword = !keyword || `${entry.purpose} ${entry.note}`.toLowerCase().includes(keyword);
-        return matchesMonth && matchesType && matchesKeyword;
-      });
-    }
-
-    function groupByDate(list) {
-      return list.reduce((groups, entry) => {
-        if (!groups[entry.date]) groups[entry.date] = [];
-        groups[entry.date].push(entry);
-        return groups;
-      }, {});
+    function summarize(list) {
+      return list.reduce((sum, entry) => {
+        if (entry.type === "income") sum.income += entry.amount;
+        if (entry.type === "expense") sum.expense += entry.amount;
+        sum.profit = sum.income - sum.expense;
+        return sum;
+      }, { income: 0, expense: 0, profit: 0 });
     }
 
     function money(value) {
@@ -701,22 +1013,29 @@
       }).format(value);
     }
 
-    function signedAmount(entry) {
-      return entry.type === "income" ? entry.amount : -entry.amount;
+    function filteredEntries() {
+      return sortEntries(entries).filter((entry) => {
+        const matchesDate = dateFilter.value ? entry.date === dateFilter.value : true;
+        const matchesMonth = dateFilter.value || !monthFilter.value ? true : entry.date.startsWith(monthFilter.value);
+        const matchesType = typeFilter.value === "all" || entry.type === typeFilter.value;
+        return matchesDate && matchesMonth && matchesType;
+      });
     }
 
-    function summarize(list) {
-      return list.reduce((sum, entry) => {
-        if (entry.type === "income") sum.income += entry.amount;
-        if (entry.type === "expense") sum.expense += entry.amount;
-        sum.profit += signedAmount(entry);
-        return sum;
-      }, { income: 0, expense: 0, profit: 0 });
+    function groupBy(list, getKey) {
+      return list.reduce((groups, item) => {
+        const key = getKey(item);
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+        return groups;
+      }, {});
     }
 
-    function setProfitStyle(element, value) {
-      element.classList.toggle("income", value >= 0);
-      element.classList.toggle("expense", value < 0);
+    function render() {
+      renderSummary();
+      renderTotalChart();
+      renderMonths();
+      renderDays();
     }
 
     function renderSummary() {
@@ -726,49 +1045,118 @@
       totals.expense.textContent = money(all.expense);
       totals.profit.textContent = money(all.profit);
       totals.today.textContent = money(todaySummary.profit);
-      setProfitStyle(totals.profit, all.profit);
-      setProfitStyle(totals.today, todaySummary.profit);
+      totals.profit.className = all.profit >= 0 ? "profit-text" : "loss-text";
+      totals.today.className = todaySummary.profit >= 0 ? "profit-text" : "loss-text";
     }
 
-    function render() {
-      renderSummary();
-      const list = filteredEntries();
-      if (!list.length) {
-        dailyList.innerHTML = '<div class="empty">暂无记录，先添加一笔收入或花费。</div>';
-        return;
-      }
+    function renderTotalChart() {
+      const summary = summarize(entries);
+      totalChart.innerHTML = renderBars([
+        ["总收入", summary.income, "income"],
+        ["总花费", summary.expense, "expense"],
+        ["总盈利", Math.abs(summary.profit), summary.profit >= 0 ? "profit" : "loss", summary.profit],
+      ]);
+    }
 
-      const groups = groupByDate(list);
-      dailyList.innerHTML = Object.keys(groups).map((date) => {
-        const dayEntries = groups[date];
-        const sum = summarize(dayEntries);
+    function renderBars(rows) {
+      const max = Math.max(...rows.map((row) => row[1]), 1);
+      return rows.map(([label, value, type, displayValue = value]) => {
+        const width = Math.max(3, Math.round((value / max) * 100));
         return `
-          <article class="day">
-            <div class="day-head">
-              <div class="day-date">${escapeHtml(date)}</div>
-              <div class="pill income">收入 ${money(sum.income)}</div>
-              <div class="pill expense">花费 ${money(sum.expense)}</div>
-              <div class="pill ${sum.profit >= 0 ? "income" : "expense"}">盈利 ${money(sum.profit)}</div>
-            </div>
-            <div class="entries">
-              ${dayEntries.map(renderEntry).join("")}
-            </div>
-          </article>
+          <div class="bar-row">
+            <div class="bar-label">${escapeHtml(label)}</div>
+            <div class="bar-track"><div class="bar-fill ${type}" style="width:${width}%"></div></div>
+            <div class="bar-value ${type === "expense" || type === "loss" ? "expense-text" : type === "income" ? "income-text" : "profit-text"}">${money(displayValue)}</div>
+          </div>
         `;
       }).join("");
     }
 
+    function renderMonths() {
+      const groups = groupBy(sortEntries(entries), (entry) => entry.date.slice(0, 7));
+      const months = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+      if (!months.length) {
+        monthList.innerHTML = '<div class="empty">暂无月度数据，添加记录后这里会自动汇总。</div>';
+        return;
+      }
+
+      monthList.innerHTML = `
+        <div class="section-head">
+          <h2>月度收支</h2>
+          <span class="muted">点击月份展开或隐藏</span>
+        </div>
+        ${months.map((month) => {
+          const summary = summarize(groups[month]);
+          const expanded = openMonth === month;
+          return `
+            <article class="month-card">
+              <button class="month-button" type="button" data-month="${month}" aria-expanded="${expanded}">
+                <span class="month-title">${escapeHtml(month)}</span>
+                <span class="month-mini">
+                  <span class="pill income">收入 ${money(summary.income)}</span>
+                  <span class="pill expense">花费 ${money(summary.expense)}</span>
+                  <span class="pill profit">盈利 ${money(summary.profit)}</span>
+                </span>
+              </button>
+              <div class="month-details" ${expanded ? "" : "hidden"}>
+                <div class="bar-chart">
+                  ${renderBars([
+                    ["月收入", summary.income, "income"],
+                    ["月花费", summary.expense, "expense"],
+                    ["月盈利", Math.abs(summary.profit), summary.profit >= 0 ? "profit" : "loss", summary.profit],
+                  ])}
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      `;
+    }
+
+    function renderDays() {
+      const list = filteredEntries();
+      if (!list.length) {
+        dayList.innerHTML = '<div class="empty">当前日期或月份暂无记录。</div>';
+        return;
+      }
+
+      const groups = groupBy(list, (entry) => entry.date);
+      const days = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+      dayList.innerHTML = `
+        <div class="section-head">
+          <h2>每日明细</h2>
+          <span class="muted">按日期查看花费与收入来源</span>
+        </div>
+        ${days.map((date) => {
+          const dayEntries = groups[date];
+          const summary = summarize(dayEntries);
+          return `
+            <article class="day-card">
+              <div class="day-head">
+                <span class="day-date">${escapeHtml(date)}</span>
+                <span class="month-mini">
+                  <span class="pill income">收入 ${money(summary.income)}</span>
+                  <span class="pill expense">花费 ${money(summary.expense)}</span>
+                  <span class="pill profit">盈利 ${money(summary.profit)}</span>
+                </span>
+              </div>
+              ${dayEntries.map(renderEntry).join("")}
+            </article>
+          `;
+        }).join("")}
+      `;
+    }
+
     function renderEntry(entry) {
-      const label = entry.type === "income" ? "收入" : "花费";
-      const amount = entry.type === "income" ? money(entry.amount) : `-${money(entry.amount)}`;
+      const isIncome = entry.type === "income";
       return `
         <div class="entry">
-          <span class="tag ${entry.type}">${label}</span>
+          <span class="tag ${entry.type}">${isIncome ? "收入" : "花费"}</span>
           <div class="entry-main">
-            <div class="purpose">${escapeHtml(entry.purpose)}</div>
-            ${entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : ""}
+            <div class="entry-purpose">${escapeHtml(entry.purpose)}</div>
+            <div class="entry-source">来源：${escapeHtml(entry.source)}</div>
           </div>
-          <div class="amount ${entry.type}">${amount}</div>
+          <div class="entry-amount ${isIncome ? "income-text" : "expense-text"}">${isIncome ? "" : "-"}${money(entry.amount)}</div>
           <button class="delete" type="button" title="删除" data-delete-id="${entry.id}">×</button>
         </div>
       `;
