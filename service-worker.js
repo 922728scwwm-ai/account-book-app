@@ -1,4 +1,4 @@
-const CACHE_NAME = "auto-account-book-v1";
+const CACHE_NAME = "auto-account-book-v2";
 const APP_FILES = [
   "./",
   "./index.html",
